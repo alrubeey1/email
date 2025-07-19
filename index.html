@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Email Management System</title>
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Processing...</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <i class="fas fa-envelope"></i>
+                    Enhanced Email System
+                </h1>
+                <div class="header-actions">
+                    <button id="help-btn" class="btn btn-outline" aria-label="Help and Keyboard Shortcuts">
+                        <i class="fas fa-question-circle"></i>
+                        Help
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-navigation" role="tablist">
+            <button class="tab-btn active" data-tab="accounts" role="tab" aria-selected="true" aria-controls="accounts-panel">
+                <i class="fas fa-server"></i>
+                <span>SMTP Accounts</span>
+                <kbd>Ctrl+1</kbd>
+            </button>
+            <button class="tab-btn" data-tab="emails" role="tab" aria-selected="false" aria-controls="emails-panel">
+                <i class="fas fa-list"></i>
+                <span>Email Lists</span>
+                <kbd>Ctrl+2</kbd>
+            </button>
+            <button class="tab-btn" data-tab="compose" role="tab" aria-selected="false" aria-controls="compose-panel">
+                <i class="fas fa-edit"></i>
+                <span>Compose</span>
+                <kbd>Ctrl+3</kbd>
+            </button>
+            <button class="tab-btn" data-tab="bulk" role="tab" aria-selected="false" aria-controls="bulk-panel">
+                <i class="fas fa-paper-plane"></i>
+                <span>Bulk Send</span>
+                <kbd>Ctrl+4</kbd>
+            </button>
+            <button class="tab-btn" data-tab="settings" role="tab" aria-selected="false" aria-controls="settings-panel">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+                <kbd>Ctrl+5</kbd>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- SMTP Accounts Panel -->
+            <section id="accounts-panel" class="tab-panel active" role="tabpanel" aria-labelledby="accounts-tab">
+                <div class="panel-header">
+                    <h2>SMTP Account Management</h2>
+                    <button id="add-account-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Account
+                    </button>
+                </div>
+
+                <div class="accounts-grid" id="accounts-grid">
+                    <!-- Account cards will be dynamically generated -->
+                </div>
+
+                <!-- Add Account Form -->
+                <div id="account-form-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="account-form-title">Add SMTP Account</h3>
+                            <button class="modal-close" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form id="account-form" class="form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="account-name">Account Name *</label>
+                                    <input type="text" id="account-name" required>
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtp-host">SMTP Host *</label>
+                                    <input type="text" id="smtp-host" required>
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="smtp-port">SMTP Port *</label>
+                                    <input type="number" id="smtp-port" value="587" required>
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtp-secure">Security</label>
+                                    <select id="smtp-secure">
+                                        <option value="tls">TLS</option>
+                                        <option value="ssl">SSL</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="smtp-user">Username *</label>
+                                    <input type="email" id="smtp-user" required>
+                                    <div class="form-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtp-pass">Password *</label>
+                                    <input type="password" id="smtp-pass" required>
+                                    <div class="form-error"></div>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" id="test-connection-btn">
+                                    <i class="fas fa-plug"></i>
+                                    Test Connection
+                                </button>
+                                <div class="form-actions-right">
+                                    <button type="button" class="btn btn-outline" id="cancel-account-btn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        Save Account
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Email Lists Panel -->
+            <section id="emails-panel" class="tab-panel" role="tabpanel" aria-labelledby="emails-tab">
+                <div class="panel-header">
+                    <h2>Email List Management</h2>
+                    <button id="add-email-list-btn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Email List
+                    </button>
+                </div>
+
+                <div class="email-lists-container">
+                    <div class="email-lists-grid" id="email-lists-grid">
+                        <!-- Email list cards will be dynamically generated -->
+                    </div>
+                </div>
+
+                <!-- Add Email List Modal -->
+                <div id="email-list-modal" class="modal hidden">
+                    <div class="modal-content large">
+                        <div class="modal-header">
+                            <h3 id="email-list-title">Add Email List</h3>
+                            <button class="modal-close" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form id="email-list-form" class="form">
+                            <div class="form-group">
+                                <label for="list-name">List Name *</label>
+                                <input type="text" id="list-name" required>
+                                <div class="form-error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="email-textarea">Email Addresses (one per line) *</label>
+                                <textarea id="email-textarea" rows="10" placeholder="email1@example.com&#10;email2@example.com&#10;..."></textarea>
+                                <div class="form-helper">
+                                    <span class="email-count">0 emails</span>
+                                    <button type="button" class="btn btn-sm btn-outline" id="import-csv-btn">
+                                        <i class="fas fa-file-csv"></i>
+                                        Import CSV
+                                    </button>
+                                </div>
+                                <div class="form-error"></div>
+                            </div>
+                            <input type="file" id="csv-file-input" accept=".csv" hidden>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" id="cancel-email-list-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    Save Email List
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Compose Email Panel -->
+            <section id="compose-panel" class="tab-panel" role="tabpanel" aria-labelledby="compose-tab">
+                <div class="panel-header">
+                    <h2>Compose Email</h2>
+                    <div class="panel-actions">
+                        <button id="preview-email-btn" class="btn btn-outline">
+                            <i class="fas fa-eye"></i>
+                            Preview
+                        </button>
+                        <button id="save-draft-btn" class="btn btn-outline">
+                            <i class="fas fa-save"></i>
+                            Save Draft
+                        </button>
+                    </div>
+                </div>
+
+                <form id="compose-form" class="compose-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="from-name">From Name</label>
+                            <input type="text" id="from-name" placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="from-email">Custom From Email</label>
+                            <input type="email" id="from-email" placeholder="custom@example.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email-subject">Subject *</label>
+                        <input type="text" id="email-subject" required placeholder="Enter email subject">
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="editor-toolbar">
+                            <label>Email Content *</label>
+                            <div class="format-toggle">
+                                <button type="button" class="format-btn active" data-format="html">HTML</button>
+                                <button type="button" class="format-btn" data-format="text">Plain Text</button>
+                            </div>
+                        </div>
+                        <div class="editor-container">
+                            <textarea id="email-content" rows="15" required placeholder="Enter your email content here..."></textarea>
+                            <div id="html-editor" class="html-editor hidden">
+                                <div class="editor-controls">
+                                    <button type="button" class="editor-btn" data-action="bold"><i class="fas fa-bold"></i></button>
+                                    <button type="button" class="editor-btn" data-action="italic"><i class="fas fa-italic"></i></button>
+                                    <button type="button" class="editor-btn" data-action="underline"><i class="fas fa-underline"></i></button>
+                                    <button type="button" class="editor-btn" data-action="link"><i class="fas fa-link"></i></button>
+                                </div>
+                                <div class="editor-content" contenteditable="true"></div>
+                            </div>
+                        </div>
+                        <div class="form-error"></div>
+                    </div>
+                </form>
+
+                <!-- Email Preview Modal -->
+                <div id="email-preview-modal" class="modal hidden">
+                    <div class="modal-content large">
+                        <div class="modal-header">
+                            <h3>Email Preview</h3>
+                            <button class="modal-close" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="email-preview">
+                            <div class="email-header">
+                                <div class="email-meta">
+                                    <strong>From:</strong> <span id="preview-from"></span><br>
+                                    <strong>Subject:</strong> <span id="preview-subject"></span>
+                                </div>
+                            </div>
+                            <div class="email-body" id="preview-body"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bulk Send Panel -->
+            <section id="bulk-panel" class="tab-panel" role="tabpanel" aria-labelledby="bulk-tab">
+                <div class="panel-header">
+                    <h2>Bulk Email Sending</h2>
+                    <div class="panel-actions">
+                        <button id="start-bulk-send-btn" class="btn btn-primary" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                            Start Sending
+                        </button>
+                        <button id="pause-bulk-send-btn" class="btn btn-outline" disabled>
+                            <i class="fas fa-pause"></i>
+                            Pause
+                        </button>
+                        <button id="stop-bulk-send-btn" class="btn btn-danger" disabled>
+                            <i class="fas fa-stop"></i>
+                            Stop
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bulk-send-setup">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="select-email-list">Select Email List *</label>
+                            <select id="select-email-list" required>
+                                <option value="">Choose a list...</option>
+                            </select>
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="select-smtp-accounts">Select SMTP Accounts *</label>
+                            <div class="checkbox-group" id="smtp-accounts-checkboxes">
+                                <!-- SMTP account checkboxes will be dynamically generated -->
+                            </div>
+                            <div class="form-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="send-delay">Delay Between Emails (seconds)</label>
+                            <input type="number" id="send-delay" value="5" min="1" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="batch-size">Batch Size</label>
+                            <input type="number" id="batch-size" value="10" min="1" max="100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <h3>Sending Progress</h3>
+                        <div class="progress-stats">
+                            <div class="stat">
+                                <span class="stat-label">Sent:</span>
+                                <span class="stat-value" id="emails-sent">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Failed:</span>
+                                <span class="stat-value" id="emails-failed">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Remaining:</span>
+                                <span class="stat-value" id="emails-remaining">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Total:</span>
+                                <span class="stat-value" id="emails-total">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <span class="progress-text" id="progress-text">0%</span>
+                    </div>
+                    <div class="current-status" id="current-status">
+                        Ready to start sending...
+                    </div>
+                </div>
+
+                <!-- Sending Log -->
+                <div class="sending-log">
+                    <div class="log-header">
+                        <h4>Sending Log</h4>
+                        <button id="clear-log-btn" class="btn btn-sm btn-outline">
+                            <i class="fas fa-trash"></i>
+                            Clear Log
+                        </button>
+                    </div>
+                    <div class="log-content" id="sending-log"></div>
+                </div>
+            </section>
+
+            <!-- Settings Panel -->
+            <section id="settings-panel" class="tab-panel" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="panel-header">
+                    <h2>Settings & Configuration</h2>
+                </div>
+
+                <div class="settings-sections">
+                    <div class="settings-section">
+                        <h3>Text Obfuscation</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-obfuscation">
+                                <span class="checkbox-custom"></span>
+                                Enable text obfuscation
+                            </label>
+                            <p class="form-help">Randomly replace characters to avoid spam filters</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="obfuscation-rate">Obfuscation Rate (%)</label>
+                            <input type="range" id="obfuscation-rate" min="5" max="25" value="10">
+                            <span class="range-value">10%</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Link Replacement</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable-link-replacement">
+                                <span class="checkbox-custom"></span>
+                                Enable link replacement
+                            </label>
+                            <p class="form-help">Replace links with tracking or redirect URLs</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="redirect-domain">Redirect Domain</label>
+                            <input type="url" id="redirect-domain" placeholder="https://redirect.example.com">
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Application Settings</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="auto-save" checked>
+                                <span class="checkbox-custom"></span>
+                                Auto-save drafts
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="show-animations" checked>
+                                <span class="checkbox-custom"></span>
+                                Show animations
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="high-contrast">
+                                <span class="checkbox-custom"></span>
+                                High contrast mode
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Data Management</h3>
+                        <div class="form-actions">
+                            <button id="export-data-btn" class="btn btn-outline">
+                                <i class="fas fa-download"></i>
+                                Export Data
+                            </button>
+                            <button id="import-data-btn" class="btn btn-outline">
+                                <i class="fas fa-upload"></i>
+                                Import Data
+                            </button>
+                            <button id="clear-data-btn" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                Clear All Data
+                            </button>
+                        </div>
+                        <input type="file" id="import-file-input" accept=".json" hidden>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Keyboard Shortcuts & Help</h3>
+                <button class="modal-close" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="help-content">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-section">
+                        <h4>Navigation</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + 1</kbd>
+                            <span>SMTP Accounts</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + 2</kbd>
+                            <span>Email Lists</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + 3</kbd>
+                            <span>Compose</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + 4</kbd>
+                            <span>Bulk Send</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + 5</kbd>
+                            <span>Settings</span>
+                        </div>
+                    </div>
+                    <div class="shortcut-section">
+                        <h4>Actions</h4>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + T</kbd>
+                            <span>Test Connection</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + S</kbd>
+                            <span>Save/Send</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl + P</kbd>
+                            <span>Preview Email</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Escape</kbd>
+                            <span>Close Modals</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="script-part2.js"></script>
+</body>
+</html>
